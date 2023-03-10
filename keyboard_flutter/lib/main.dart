@@ -1,6 +1,10 @@
-import 'dart:js';
-
 import 'package:flutter/material.dart';
+
+enum InputButton {
+  numberButton,
+  deleteButton,
+  deleteAllButton,
+}
 
 void main() {
   runApp(const MyApp());
@@ -30,174 +34,151 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  var isInputList = [false, false, false, false];
-
-  var dotList = [
-    dotView(false),
-    dotView(false),
-    dotView(false),
-    dotView(false)
-  ];
-  String Dialnum = "";
-  void btnClicked(String btnText) {
-    Dialnum += btnText;
-    if ((Dialnum.length > 4 || Dialnum.length == 0)) {
-      Dialnum = "";
-      isInputList = [false, false, false, false];
-    } else if (Dialnum.length == 1) {
-      isInputList = [true, false, false, false];
-    } else if (Dialnum.length == 2) {
-      isInputList = [true, true, false, false];
-    } else if (Dialnum.length == 3) {
-      isInputList = [true, true, true, false];
-    } else if (Dialnum.length == 4) {
-      isInputList = [true, true, true, true];
-    }
-
+  String _passCode = "";
+  void _onButtonClicked(String btnText) {
     setState(() {
-      dotList = isInputList.map((e) => dotView(e)).toList();
-    });
-  }
-
-  void btnDelete(String btnDelete) {
-    if (btnDelete == 'DELETE') {
-      Dialnum = Dialnum.substring(0, Dialnum.length - 1);
-      if (Dialnum.length == 0) {
-        isInputList = [false, false, false, false];
-      } else if (Dialnum.length == 1) {
-        isInputList = [true, false, false, false];
-      } else if (Dialnum.length == 2) {
-        isInputList = [true, true, false, false];
-      } else if (Dialnum.length == 3) {
-        isInputList = [true, true, true, false];
-      } else if (Dialnum.length == 4) {
-        isInputList = [true, true, true, true];
+      _passCode += btnText;
+      if (_passCode.length > 4) {
+        _passCode = "";
       }
-    }
-
-    setState(() {
-      dotList = isInputList.map((e) => dotView(e)).toList();
     });
   }
 
-  Widget DialKey(String number, letter) {
-    return Container(
-      width: 50,
-      height: 50,
-      child: FloatingActionButton(
-          onPressed: () => btnClicked(number),
-          backgroundColor: Colors.grey,
-          child: Column(
-            children: [
-              Text(
-                '$number',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w400),
-              ),
-              Text(
-                '$letter',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w400),
-              )
-            ],
-          )),
-    );
+  void _onDelete(String keyDelete) {
+    setState(() {
+      {
+        _passCode = _passCode.substring(0, _passCode.length - 1);
+      }
+    });
   }
 
-  Widget Deletebtn(String textD) {
-    return Container(
-      width: 130,
-      height: 50,
-      child: TextButton(
-        onPressed: () => btnDelete(textD),
-        child: Text('$textD'),
-      ),
-    );
-  }
-
-  Widget DeleteBtnAll(String text) {
-    return Container(
-      width: 130,
-      height: 50,
-      child: TextButton(
-        onPressed: () => btnClicked(text),
-        child: Text('$text'),
-      ),
-    );
+  Widget formButton(InputButton? solutions, String? number, String? text) {
+    switch (solutions) {
+      case InputButton.numberButton:
+        return SizedBox(
+          width: 50,
+          height: 50,
+          child: FloatingActionButton(
+              onPressed: () => _onButtonClicked('$number'),
+              backgroundColor: Colors.grey,
+              child: Column(
+                children: [
+                  Text(
+                    '$number',
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w400),
+                  ),
+                  Text(
+                    '$text',
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w400),
+                  )
+                ],
+              )),
+        );
+      case InputButton.deleteButton:
+        number = "";
+        text = "DELETE";
+        {
+          return SizedBox(
+              width: 130,
+              height: 50,
+              child: TextButton(
+                onPressed: _passCode.isEmpty ? null : () => _onDelete('$text'),
+                child: Text(text),
+              ));
+        }
+      case InputButton.deleteAllButton:
+        {
+          number = "";
+          text = "DELETE ALL";
+          return SizedBox(
+              width: 130,
+              height: 50,
+              child: TextButton(
+                onPressed: () => _onButtonClicked('$text'),
+                child: Text(text),
+              ));
+        }
+      default:
+        InputButton.numberButton;
+    }
+    return formButton(solutions, "", "");
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Text('Enter Passcode'),
-            ]),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [dotList[0], dotList[1], dotList[2], dotList[3]],
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: const [
+            Text('Enter Passcode'),
+          ]),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List<DotView>.generate(
+              4,
+              (index) =>
+                  DotView(index < _passCode.length && _passCode.length < 5),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                DialKey('1', ''),
-                DialKey('2', 'ABC'),
-                DialKey('3', 'DEF'),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                DialKey('4', 'GHI'),
-                DialKey('5', 'JKL'),
-                DialKey('6', 'MNO'),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                DialKey('7', 'PQRS'),
-                DialKey('8', 'TUV'),
-                DialKey('9', 'WXYZ'),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                DeleteBtnAll('DELETE ALL'),
-                DialKey('0', '+'),
-                Deletebtn('DELETE')
-              ],
-            ),
-          ],
-        ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              formButton(InputButton.numberButton, '1', ''),
+              formButton(InputButton.numberButton, '2', 'ABC'),
+              formButton(InputButton.numberButton, '3', 'DEF'),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              formButton(InputButton.numberButton, '4', 'GHI'),
+              formButton(InputButton.numberButton, '5', 'JKL'),
+              formButton(InputButton.numberButton, '6', 'MNO'),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              formButton(InputButton.numberButton, '7', 'PQRS'),
+              formButton(InputButton.numberButton, '8', 'TUV'),
+              formButton(InputButton.numberButton, '9', 'WXYZ'),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              formButton(InputButton.deleteAllButton, '', 'DELETE'),
+              formButton(InputButton.numberButton, '0', '+'),
+              formButton(InputButton.deleteButton, '', 'DELETE ALL'),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
-class dotView extends StatelessWidget {
-  dotView(this.isInput);
+class DotView extends StatelessWidget {
+  const DotView(this.isInput, {super.key});
+  // ignore: prefer_typing_uninitialized_variables
   final isInput;
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(7.0),
-          // color: isInput ? Colors.red : Colors.blue,
-          color: Colors.red),
+          borderRadius: BorderRadius.circular(7.0), color: Colors.red),
       width: 16,
       height: 16,
       child: Container(
         decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(9.0)),
+            borderRadius: const BorderRadius.all(Radius.circular(9.0)),
             color: isInput ? Colors.red : Colors.white),
       ),
     );
